@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: csi
+  name: csi
+spec:
+  selector:
+    matchLabels:
+      app: csi
+  template:
+    metadata:
+      labels:
+        app: csi
+    spec:
+      serviceAccountName: csi
+      containers:
+      - name: external-provisioner
+        image: registry.k8s.io/sig-storage/csi-provisioner:v3.5.0
+        args:
+        - "--csi-address=/var/lib/csi/sockets/csi.sock"
+        volumeMounts:
+        - mountPath: /var/lib/csi/sockets
+          name: csi-sock
+      - name: external-attacher
+        image: registry.k8s.io/sig-storage/csi-attacher:v4.3.0
+        args:
+        - "--csi-address=/var/lib/csi/sockets/csi.sock"
+        volumeMounts:
+        - mountPath: /var/lib/csi/sockets
+          name: csi-sock
+      - name: csi
+        image: galebias/csi:v0.0.1
+        imagePullPolicy: Always
+        args:
+        - "--endpoint=unix:///var/lib/csi/sockets/csi.sock"
+        volumeMounts:
+        - mountPath: /var/lib/csi/sockets
+          name: csi-sock
+      volumes:
+      - name: csi-sock
+        emptyDir: {}

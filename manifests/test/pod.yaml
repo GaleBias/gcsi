@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gale
+spec:
+  volumes:
+  - name: web
+    persistentVolumeClaim:
+      claimName: gale
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+      name: "http"
+    volumeMounts:
+    - mountPath: "/usr/share/nginx/html"
+      name: web

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: csi-node
+spec:
+  selector:
+    matchLabels:
+      name: csi-node
+  template:
+    metadata:
+      labels:
+        name: csi-node
+    spec:
+      containers:
+      - name: csi-driver-registrar
+        image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.5.0
+        args:
+        - "--csi-address=/csi/csi.sock"
+        - "--kubelet-registration-path=/var/lib/kubelet/plugins/csi.gale.com/csi.sock"
+        volumeMounts:
+        - name: plugin-dir
+          mountPath: /csi
+        - name: registration-dir
+          mountPath: /registration
+      - name: csi-node
+        image: galebias/csi:v0.0.1
+        env:
+        - name: nodeName
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        args:
+        - "--endpoint=unix:///csi/csi.sock"
+        volumeMounts:
+        - name: plugin-dir
+          mountPath: /csi
+      volumes:
+      - name: registration-dir
+        hostPath:
+          path: /var/lib/kubelet/plugins_registry/
+          type: DirectoryOrCreate
+      - name: plugin-dir
+        hostPath:
+          path: /var/lib/kubelet/plugins/csi.gale.com/
+          type: DirectoryOrCreate
