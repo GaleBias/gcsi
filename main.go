@@ -13,8 +13,8 @@ func main() {
 		project = flag.String("project", "2fb7832179084025b2eadab146ad3cb0", "project of cloud platform")
 		region  = flag.String("region", "ap-southeast-3", "region where the volumes are going to be provisioned")
 
-		ak = flag.String("ak", "2DMWCD1X4TB2HK7CYMAT", "ak of the storage provider")
-		sk = flag.String("sk", "pGBgy2DZQj6Cos74UVdI0iSh2xB4e5dZt9jNTSQK", "ak of the storage provider")
+		ak = flag.String("ak", "xxxxxxxxx", "ak of the storage provider")
+		sk = flag.String("sk", "xxxxxxxxx", "ak of the storage provider")
 		// zone: ap-southeast-3a、b、c、d、e
 	)
 	flag.Parse()

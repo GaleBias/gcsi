@@ -16,7 +16,7 @@ import (
 
 func (d *Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRequest) (*csi.NodeStageVolumeResponse, error) {
 	fmt.Println()
-	fmt.Println("************* NodeStageVolume of controller service have been called *************")
+	fmt.Println("************* NodeStageVolume of node service have been called *************")
 	fmt.Printf("req: %+#v\n", *req)
 	fmt.Println()
 
@@ -131,7 +131,7 @@ func (d *Driver) NodeUnstageVolume(context.Context, *csi.NodeUnstageVolumeReques
 
 func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolumeRequest) (*csi.NodePublishVolumeResponse, error) {
 	fmt.Println()
-	fmt.Println("************* NodeStageVolume of controller service have been called *************")
+	fmt.Println("************* NodePublishVolume of node service have been called *************")
 	fmt.Printf("req: %+#v\n", *req)
 	fmt.Println()
 

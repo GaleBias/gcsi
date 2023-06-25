@@ -20,6 +20,10 @@ func (d *Driver) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest)
 	fmt.Printf("req: %+#v\n", *req)
 	fmt.Println()
 
+	for _, top := range req.AccessibilityRequirements.Preferred {
+		fmt.Printf("topology :%+#v\n", top)
+	}
+
 	// name is present
 	if req.Name == "" {
 		return nil, status.Error(codes.InvalidArgument, "createVolume must be called with a req name")
@@ -88,6 +92,13 @@ func (d *Driver) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest)
 			// specify content source, but only in cases where its specified in the PVC
 			VolumeContext: map[string]string{
 				"hw:passthrough": passthrough,
+			},
+			AccessibleTopology: []*csi.Topology{
+				&csi.Topology{
+					Segments: map[string]string{
+						"zone": "ap-southeast-3b",
+					},
+				},
 			},
 		},
 	}, nil

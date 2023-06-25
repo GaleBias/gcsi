@@ -17,13 +17,14 @@ spec:
         args:
         - "--csi-address=/csi/csi.sock"
         - "--kubelet-registration-path=/var/lib/kubelet/plugins/csi.gale.com/csi.sock"
+        - "-v=6"
         volumeMounts:
         - name: plugin-dir
           mountPath: /csi
         - name: registration-dir
           mountPath: /registration
       - name: csi-node
-        image: galebias/csi:v0.0.1
+        image: galebias/csi:v0.0.4
         env:
         - name: nodeName
           valueFrom:
@@ -34,6 +35,13 @@ spec:
         volumeMounts:
         - name: plugin-dir
           mountPath: /csi
+        - name: pod-dir
+          mountPath: /var/lib/kubelet
+          mountPropagation: "Bidirectional"
+        - name: device-dir
+          mountPath: /dev
+        securityContext:
+          privileged: true
       volumes:
       - name: registration-dir
         hostPath:
@@ -43,3 +51,9 @@ spec:
         hostPath:
           path: /var/lib/kubelet/plugins/csi.gale.com/
           type: DirectoryOrCreate
+      - name: pod-dir
+        hostPath:
+          path: /var/lib/kubelet
+      - name: device-dir
+        hostPath:
+          path: /dev

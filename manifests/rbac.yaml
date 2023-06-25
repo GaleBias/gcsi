@@ -25,6 +25,7 @@ rules:
   - persistentvolumeclaims
   - persistentvolumes
   - events
+  - nodes
   verbs:
   - list
   - watch
