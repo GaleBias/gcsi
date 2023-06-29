@@ -104,8 +104,21 @@ func (d *Driver) CreateVolume(ctx context.Context, req *csi.CreateVolumeRequest)
 	}, nil
 }
 
-func (d *Driver) DeleteVolume(context.Context, *csi.DeleteVolumeRequest) (*csi.DeleteVolumeResponse, error) {
-	return nil, nil
+func (d *Driver) DeleteVolume(ctx context.Context, req *csi.DeleteVolumeRequest) (*csi.DeleteVolumeResponse, error) {
+	fmt.Println()
+	fmt.Println("************* ControllerPublishVolume of controller service have been called *************")
+	fmt.Printf("req: %+#v\n", *req)
+	fmt.Println()
+
+	_, err := d.storage.DeleteVolume(&evsModel.DeleteVolumeRequest{
+		VolumeId: req.VolumeId,
+	})
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("磁盘删除出现错误,err: %s\n", err))
+	}
+
+	return &csi.DeleteVolumeResponse{}, nil
 }
 
 func (d *Driver) ControllerPublishVolume(ctx context.Context, req *csi.ControllerPublishVolumeRequest) (*csi.ControllerPublishVolumeResponse, error) {
@@ -175,8 +188,22 @@ func (d *Driver) getEvsAttachIdentity(volumeId string, identity *string) error {
 	return err
 }
 
-func (d *Driver) ControllerUnpublishVolume(context.Context, *csi.ControllerUnpublishVolumeRequest) (*csi.ControllerUnpublishVolumeResponse, error) {
-	return nil, nil
+func (d *Driver) ControllerUnpublishVolume(ctx context.Context, req *csi.ControllerUnpublishVolumeRequest) (*csi.ControllerUnpublishVolumeResponse, error) {
+	fmt.Println()
+	fmt.Println("************* ControllerUnpublishVolume of controller service have been called *************")
+	fmt.Printf("req: %+#v\n", *req)
+	fmt.Println()
+
+	_, err := d.ecs.DetachServerVolume(&ecsModel.DetachServerVolumeRequest{
+		ServerId: req.NodeId,
+		VolumeId: req.VolumeId,
+	})
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("磁盘卸载出现错误,err: %s\n", err))
+	}
+
+	return &csi.ControllerUnpublishVolumeResponse{}, nil
 }
 
 func (d *Driver) ValidateVolumeCapabilities(context.Context, *csi.ValidateVolumeCapabilitiesRequest) (*csi.ValidateVolumeCapabilitiesResponse, error) {

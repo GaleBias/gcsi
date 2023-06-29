@@ -110,23 +110,19 @@ func formatAndMakeFs(source, fsType string) error {
 		return fmt.Errorf("create fs command failed output: %s, and err: %s\n", out, err.Error())
 	}
 	return nil
-
-	// mkfsCmd := fmt.Sprintf("mkfs.%s", fsType)
-	// _, err := exec.LookPath(mkfsCmd)
-	// if err != nil {
-	// 	return fmt.Errorf("unable to find the mkfs (%s) errors is %s", mkfsCmd, err.Error())
-	// }
-
-	// mkfsArgs := []string{"-F", source}
-	// out, err := exec.Command(mkfsCmd, mkfsArgs...).CombinedOutput()
-	// if err != nil {
-	// 	return fmt.Errorf("create fs command failed output: %s, and err: %s\n", out, err.Error())
-	// }
-	// return nil
 }
 
-func (d *Driver) NodeUnstageVolume(context.Context, *csi.NodeUnstageVolumeRequest) (*csi.NodeUnstageVolumeResponse, error) {
-	return nil, nil
+func (d *Driver) NodeUnstageVolume(ctx context.Context, req *csi.NodeUnstageVolumeRequest) (*csi.NodeUnstageVolumeResponse, error) {
+	fmt.Println()
+	fmt.Println("************* NodeUnstageVolume of node service have been called *************")
+	fmt.Printf("req: %+#v\n", *req)
+	fmt.Println()
+	out, err := exec.Command("umount", req.StagingTargetPath).CombinedOutput()
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf("NodeUnpublishVolume umount err: %s, output: %s\n", err.Error(), out))
+	}
+
+	return &csi.NodeUnstageVolumeResponse{}, nil
 }
 
 func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolumeRequest) (*csi.NodePublishVolumeResponse, error) {
@@ -162,8 +158,25 @@ func (d *Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolu
 	return &csi.NodePublishVolumeResponse{}, nil
 }
 
-func (d *Driver) NodeUnpublishVolume(context.Context, *csi.NodeUnpublishVolumeRequest) (*csi.NodeUnpublishVolumeResponse, error) {
-	return nil, nil
+func (d *Driver) NodeUnpublishVolume(ctx context.Context, req *csi.NodeUnpublishVolumeRequest) (*csi.NodeUnpublishVolumeResponse, error) {
+	fmt.Println()
+	fmt.Println("************* NodeUnpublishVolume of node service have been called *************")
+	fmt.Printf("req: %+#v\n", *req)
+	fmt.Println()
+
+	if req.VolumeId == "" {
+		return nil, status.Error(codes.InvalidArgument, "NodeUnpublishVolume Volume ID must be provided")
+	}
+	if req.TargetPath == "" {
+		return nil, status.Error(codes.InvalidArgument, "NodeUnpublishVolume Target Path must be provided")
+	}
+
+	out, err := exec.Command("umount", req.TargetPath).CombinedOutput()
+	if err != nil {
+		return nil, status.Error(codes.Internal, fmt.Sprintf(" NodeUnpublishVolume umount err: %s, output: %s \n", err.Error(), out))
+	}
+
+	return &csi.NodeUnpublishVolumeResponse{}, nil
 }
 
 func (d *Driver) NodeGetVolumeStats(context.Context, *csi.NodeGetVolumeStatsRequest) (*csi.NodeGetVolumeStatsResponse, error) {
